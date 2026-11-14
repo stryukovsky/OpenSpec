@@ -58,6 +58,7 @@ describe('published schema reference', () => {
     expect(doc).toContain(
       'Each task group MUST land the tests and documentation its own work'
     );
-    expect(doc).toContain('Each task MUST state how to verify completion');
+    expect(doc).toContain('Use 3-7 words per task description');
+    expect(doc).toContain('Add separate verification tasks for concrete observable outcomes');
   });
 });

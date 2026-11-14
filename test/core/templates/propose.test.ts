@@ -140,31 +140,29 @@ describe('default task guidance', () => {
     );
   });
 
-  it('requires a concrete verification method in each task (#345)', () => {
+  it('requires short atomic tasks with separate verification', () => {
     const tasks = defaultSchema.artifacts.find(artifact => artifact.id === 'tasks');
     expect(tasks).toBeDefined();
-    expect(tasks!.instruction).toContain('Each task MUST state how to verify completion');
-    expect(tasks!.instruction).toMatch(
-      /a test, command,\s+observable behavior, or delivered artifact/
-    );
-    expect(tasks!.instruction).toMatch(
-      /Put the verification in\s+that task's checkbox description/
-    );
-    expect(tasks!.instruction).toMatch(
-      /Use a separate verification task only\s+when it checks broader integration or system behavior that spans\s+multiple implementation tasks/
-    );
+    expect(tasks!.instruction).toContain('Write one concrete action per checkbox on a single line');
+    expect(tasks!.instruction).toContain('Use 3-7 words per task description');
+    expect(tasks!.instruction).toContain('Never use commas or semicolons in task descriptions');
+    expect(tasks!.instruction).toContain('Split compound work into more tasks');
+    expect(tasks!.instruction).toContain('Add separate verification tasks for concrete observable outcomes');
+    expect(tasks!.instruction).toContain('Split distinct test cases into separate tasks');
 
     const example = tasks!.instruction.match(/```\s*([\s\S]*?)```/)?.[1];
     expect(example).toBeDefined();
     const numberedTasks = example!.split('\n').filter(line => /^- \[ \] \d+\.\d+ /.test(line));
-    expect(numberedTasks).toHaveLength(5);
-    expect(numberedTasks.every(line => /\bverify\b/i.test(line))).toBe(true);
-    expect(numberedTasks[0]).toContain('expected files are present');
-    expect(numberedTasks[1]).toContain('package installation succeeds');
-    expect(numberedTasks[2]).toContain('export test passes');
-    expect(numberedTasks[3]).toContain('unit tests cover quoting and delimiters');
-    expect(numberedTasks[4]).toContain('Document the export API');
-    expect(example).not.toMatch(/^- \[ \] \d+\.\d+ (?:verify|run (?:the )?verification)\b/im);
+    expect(numberedTasks).toHaveLength(11);
+    for (const line of numberedTasks) {
+      const description = line.replace(/^- \[ \] \d+\.\d+ /, '');
+      expect(description.split(/\s+/).length).toBeGreaterThanOrEqual(3);
+      expect(description.split(/\s+/).length).toBeLessThanOrEqual(7);
+      expect(description).not.toMatch(/[,;]|\band\b/i);
+    }
+    expect(numberedTasks.some(line => / Verify /.test(line))).toBe(true);
+    expect(numberedTasks).toContain('- [ ] 2.4 Test CSV field quoting');
+    expect(numberedTasks).toContain('- [ ] 2.5 Test CSV delimiter escaping');
   });
 
   // #1952: agents parked testing and documentation in one trailing group, so a
